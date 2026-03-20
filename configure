@@ -420,15 +420,18 @@ print_config "futex waitv support" "$futexv"
 ##########################################
 # Check block discard cmd support
 discard_cmd="no"
-cat > $TMPC << EOF
+# Check if linux/blkdev.h exists first
+if echo '#include <linux/blkdev.h>' | $cc -E -x c - >/dev/null 2>&1; then
+  cat > $TMPC << EOF
 #include <linux/blkdev.h>
 int main(void)
 {
   return BLOCK_URING_CMD_DISCARD;
 }
 EOF
-if compile_prog "" "" "discard command"; then
-  discard_cmd="yes"
+  if compile_prog "" "" "discard command"; then
+    discard_cmd="yes"
+  fi
 fi
 print_config "io_uring discard command support" "$discard_cmd"
 
